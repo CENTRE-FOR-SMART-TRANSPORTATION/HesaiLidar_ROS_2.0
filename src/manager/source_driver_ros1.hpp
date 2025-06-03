@@ -40,6 +40,7 @@
 #include <sensor_msgs/Imu.h>
 #include <boost/thread.hpp>
 #include "source_drive_common.hpp"
+#include <tf2/LinearMath/Quaternion.h> 
 
 class SourceDriver
 {
@@ -175,7 +176,7 @@ inline void SourceDriver::Init(const YAML::Node& config)
     driver_param.decoder_param.enable_parser_thread = true;
   #endif
   driver_ptr_->RegRecvCallback(std::bind(&SourceDriver::SendPointCloud, this, std::placeholders::_1));
-  imu_pub_ = nh_->advertise<sensor_msgs::Imu>(driver_param.input_param.ros_send_imu_topic, 10);
+  imu_pub_ = nh_->advertise<sensor_msgs::Imu>(driver_param.input_param.ros_send_imu_topic, 100);
   driver_ptr_->RegRecvCallback(std::bind(&SourceDriver::SendImuConfig, this, std::placeholders::_1));
   if(driver_param.input_param.send_packet_ros && driver_param.input_param.source_type != DATA_FROM_ROS_PACKET){
     driver_ptr_->RegRecvCallback(std::bind(&SourceDriver::SendPacket, this, std::placeholders::_1, std::placeholders::_2)) ;
@@ -196,6 +197,7 @@ inline void SourceDriver::Init(const YAML::Node& config)
     std::cout << "Driver Initialize Error...." << std::endl;
     exit(-1);
   }
+  printf("Source driver ros1 initialized\n");
 }
 
 inline void SourceDriver::Start()
@@ -268,7 +270,7 @@ inline sensor_msgs::PointCloud2 SourceDriver::ToRosMsg(const LidarDecodedFrame<L
 
   ros_msg.point_step = offset;
   ros_msg.row_step = ros_msg.width * ros_msg.point_step;
-  ros_msg.is_dense = false;
+  ros_msg.is_dense = true;
   ros_msg.data.resize(frame.points_num * ros_msg.point_step);
 
   sensor_msgs::PointCloud2Iterator<float> iter_x_(ros_msg, "x");
@@ -374,12 +376,34 @@ inline sensor_msgs::Imu SourceDriver::ToRosMsg(const LidarImuData &imu_config_)
     printf("ros1 does not support timestamps greater than 19 January 2038 03:14:07 (now %lf)\n", imu_config_.timestamp);
   }
   ros_msg.header.frame_id = frame_id_;
+
+  // Normalize quaternion
+  tf2::Quaternion q(
+    imu_config_.imu_quat_x,
+    imu_config_.imu_quat_y,
+    imu_config_.imu_quat_z,
+    imu_config_.imu_quat_w
+  );
+
+  if (q.length2() > 1e-6) {  // Avoid divide-by-zero if it's all zero
+    q.normalize();
+  } else {
+    ROS_WARN_THROTTLE(1.0, "IMU quaternion is near zero — skipping normalization");
+  }
+
+  ros_msg.orientation.x = q.x();
+  ros_msg.orientation.y = q.y();
+  ros_msg.orientation.z = q.z();
+  ros_msg.orientation.w = q.w();
+
   ros_msg.linear_acceleration.x = From_g_To_ms2(imu_config_.imu_accel_x);
   ros_msg.linear_acceleration.y = From_g_To_ms2(imu_config_.imu_accel_y);
   ros_msg.linear_acceleration.z = From_g_To_ms2(imu_config_.imu_accel_z);
-  ros_msg.angular_velocity.x = From_degs_To_rads(imu_config_.imu_ang_vel_x);
-  ros_msg.angular_velocity.y = From_degs_To_rads(imu_config_.imu_ang_vel_y);
-  ros_msg.angular_velocity.z = From_degs_To_rads(imu_config_.imu_ang_vel_z);
+
+  ros_msg.angular_velocity.x = imu_config_.imu_ang_vel_x;
+  ros_msg.angular_velocity.y = imu_config_.imu_ang_vel_y;
+  ros_msg.angular_velocity.z = imu_config_.imu_ang_vel_z;
+
   return ros_msg;
 }
 

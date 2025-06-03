@@ -24,6 +24,8 @@ public:
         YamlRead<std::string>(driver_config, "pcap_path",               driver_param.input_param.pcap_path, "");
         YamlRead<std::string>(driver_config, "firetimes_path",          driver_param.input_param.firetimes_path, "");
         YamlRead<std::string>(driver_config, "correction_file_path",    driver_param.input_param.correction_file_path, "");
+        YamlRead<std::string>(driver_config, "imu_file_path",           driver_param.input_param.imu_file_path, "");
+        YamlRead<std::string>(driver_config, "gps_file_path",           driver_param.input_param.gps_file_path, "");
         YamlRead<int>(        driver_config, "standby_mode",            driver_param.input_param.standby_mode, -1);
         YamlRead<int>(        driver_config, "speed",                   driver_param.input_param.speed, -1);
         YamlRead<std::string>(driver_config, "rs485_com",               driver_param.input_param.rs485_com, "/dev/ttyUSB0");
@@ -53,6 +55,8 @@ public:
         YamlRead<bool>(       driver_config, "enable_packet_loss_tool",    driver_param.decoder_param.enable_packet_loss_tool, false);
         YamlRead<bool>(       config["ros"], "send_packet_ros",            driver_param.input_param.send_packet_ros, false);
         YamlRead<bool>(       config["ros"], "send_point_cloud_ros",       driver_param.input_param.send_point_cloud_ros, false);
+        YamlRead<bool>(       config["ros"], "send_imu_raw",               driver_param.input_param.send_imu_raw, false);
+
         YamlRead<std::string>(config["ros"], "ros_frame_id",               driver_param.input_param.frame_id, "hesai_lidar");
         YamlRead<std::string>(config["ros"], "ros_send_packet_topic",      driver_param.input_param.ros_send_packet_topic, "hesai_packets");
         YamlRead<std::string>(config["ros"], "ros_send_point_cloud_topic", driver_param.input_param.ros_send_point_topic, "hesai_points");
@@ -62,7 +66,10 @@ public:
         YamlRead<std::string>(config["ros"], "ros_send_correction_topic",  driver_param.input_param.ros_send_correction_topic, NULL_TOPIC);
         YamlRead<std::string>(config["ros"], "ros_send_firetime_topic",    driver_param.input_param.ros_send_firetime_topic, NULL_TOPIC);
         YamlRead<std::string>(config["ros"], "ros_recv_correction_topic",  driver_param.input_param.ros_recv_correction_topic, NULL_TOPIC);  
-        YamlRead<std::string>(config["ros"], "ros_send_imu_topic",         driver_param.input_param.ros_send_imu_topic, NULL_TOPIC);              
+        YamlRead<std::string>(config["ros"], "ros_send_imu_topic",         driver_param.input_param.ros_send_imu_topic, NULL_TOPIC);   
+        YamlRead<std::string>(config["ros"], "ros_send_gps_topic",         driver_param.input_param.ros_send_gps_topic, NULL_TOPIC);              
+
+        printf("YAML Read complete\n");
         return true;
     }
 

@@ -184,6 +184,7 @@ if(CUDA_FOUND)
                 ptcClient_lib
                 serialClient_lib
                 ptcParser_lib
+                sensor_lib
                 log_lib
                 ${CUDA_LIBS}
                 # libhesai
@@ -205,6 +206,7 @@ else(CUDA_FOUND)
               ptcClient_lib
               serialClient_lib
               ptcParser_lib
+              sensor_lib
               log_lib
               # libhesai
   )            
@@ -230,6 +232,9 @@ endif(CUDA_FOUND)
   src/driver/HesaiLidar_SDK_2.0/libhesai/SerialClient/include
   src/driver/HesaiLidar_SDK_2.0/libhesai/PtcParser/include
   src/driver/HesaiLidar_SDK_2.0/libhesai/PtcParser
+  src/driver/HesaiLidar_SDK_2.0/libhesai/Sensors
+  src/driver/HesaiLidar_SDK_2.0/libhesai/Sensors/src
+  src/driver/HesaiLidar_SDK_2.0/libhesai/Sensors/include
   src/driver/HesaiLidar_SDK_2.0/libhesai/Logger/include
   src/driver/HesaiLidar_SDK_2.0/libhesai/include
   src/driver/HesaiLidar_SDK_2.0/driver
@@ -274,6 +279,7 @@ if($ENV{ROS_VERSION} MATCHES "2")
     ptcClient_lib
     ptcParser_lib
     serialClient_lib
+    sensor_lib
     log_lib
     platutils_lib
     DESTINATION lib)
